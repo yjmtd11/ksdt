@@ -1,15 +1,8 @@
-"""
-
-time: 2023.8.25
-cron: 1 0 * * *
-new Env('番茄json格式化');
-
-"""
-
 import json
 import os.path
 import json
 import time
+import re
 import pathlib
 
 if os.name == 'nt':
@@ -22,7 +15,7 @@ if os.name == 'nt':
 
 tomato_read_json = 'tomato_read.json'
 cookies = os.getenv('tomato_read')
-cookie_arr = cookies.split('\n')
+cookie_arr = re.split(r'\n|@', cookies)
 
 def loadFile(filePath):
     with open(filePath, 'r', encoding='utf-8') as load_f:
