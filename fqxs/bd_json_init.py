@@ -1,21 +1,15 @@
-import json
-import os.path
+"""
+
+time: 2023.9.6
+cron: 1 0 * * *
+new Env('json格式化');
+
+"""
+
 import json
 import time
-import re
 import pathlib
 
-if os.name == 'nt':
-    try:
-        from dotenv import load_dotenv
-
-        load_dotenv(dotenv_path='tomato.env', verbose=True)
-    except EnvironmentError:
-        print(EnvironmentError)
-
-tomato_read_json = 'tomato_read.json'
-cookies = os.getenv('tomato_read')
-cookie_arr = re.split(r'\n|@', cookies)
 
 def loadFile(filePath):
     with open(filePath, 'r', encoding='utf-8') as load_f:
@@ -41,94 +35,55 @@ def writeFile(filePath, json_dic):
         return 0
 
 
-def tomato_read_json_init():
-    if os.path.exists(tomato_read_json):
-        print('存在[tomato_read.json]文件，初始化所有tomato___.json文件')
-        p = pathlib.Path(".")
-        # 只遍历当前目录
-        filePath_list = []
-        ret = p.glob("tomato*.json")
-        for item in ret:
-            print(item)
-            filePath_list.append(item)
+# 构建一个pathlib.Path()对象
+# 指定一个目录起始点："F:/path_test"
+p = pathlib.Path(".")
+# 只遍历当前目录
+filePath_list = []
+ret = p.glob("tomato_read.json")
+for item in ret:
+    print(item)
+    filePath_list.append(item)
 
-        # 读取所有tomato____.json文件
-        for filePath in filePath_list:
-            print(filePath)
-            userList = loadFile(filePath)
-            new_userList = []
-            for user_data in userList:
-                name = user_data.get('name')
-                sleep_finished = user_data.get('sleep_finished')
-                title = user_data.get('title')
-                formatted_time = time.strftime('%m-%d %H:%M:%S')  # 获取当前时间
-                temp = {
-                    "name": name,
-                    "amount": 0,
-                    "time": formatted_time,
-                    "sign": 0,
-                    "lottery": 0,
-                    "prev_task_timeStamp": 0,
-                    "treasure_task_cnt": 0,
-                    "shopping_earn_money_cnt": 0,
-                    "browse_products_cnt": 0,
-                    "excitation_ad_cnt": 0,
-                    "next_readComic": 1,
-                    "daily_play_game_cnt": 0,
-                    "next_readNovel": 0.5,
-                    "next_listenNoval": 0.5,
-                    "meal_finished": -1,
-                    "sleep_finished": sleep_finished,
-                    "title": title
-                }
-                new_userList.append(temp)
-
-            print(new_userList)
-            new_userList_json = {
-                "userList": new_userList
-            }
-            writeFile(filePath, new_userList_json)
-
-    else:
-        print('无[tomato_read.json]自动创建')
-        new_userList = []
-        for count in range(len(cookie_arr)):
-            sleep_finished = None
-            formatted_time = time.strftime('%m-%d %H:%M:%S')  # 获取当前时间
-            current_time = time.strftime('%H:%M:%S')
-            if '05:00:00' <= current_time <= '08:00:00':
-                sleep_finished = 'end_sleep'
-            elif '22:00:00' <= current_time <= '23:45:00':
-                sleep_finished = 'start_sleep'
-            elif '23:45:00' < current_time <= '23:59:59' or '00:00:00' <= current_time <= '04:59:59':
-                sleep_finished = 'start_sleep'
-            elif '08:00:00' < current_time < '22:00:00':
-                sleep_finished = 'end_sleep'
-            temp = {
-                "name": "none",
-                "amount": 0,
-                "time": formatted_time,
-                "sign": 0,
-                "lottery": 0,
-                "prev_task_timeStamp": 0,
-                "treasure_task_cnt": 0,
-                "shopping_earn_money_cnt": 0,
-                "browse_products_cnt": 0,
-                "excitation_ad_cnt": 0,
-                "next_readComic": 1,
-                "daily_play_game_cnt": 0,
-                "next_readNovel": 0.5,
-                "next_listenNoval": 0.5,
-                "meal_finished": -1,
-                "sleep_finished": sleep_finished,
-                "title": "none"
-            }
-            new_userList.append(temp)
-
-        new_userList_json = {
-            "userList": new_userList
+# 读取所有tomato.json文件
+for filePath in filePath_list:
+    print(filePath)
+    userList = loadFile(filePath)
+    new_userList = []
+    for user_data in userList:
+        name = user_data.get('name')
+        sleep_finished = user_data.get('sleep_finished')
+        next_open_treasure_box = user_data.get('next_open_treasure_box')
+        title = user_data.get('title')
+        formatted_time = time.strftime('%m-%d %H:%M:%S')  # 获取当前时间
+        if next_open_treasure_box is None:
+            next_open_treasure_box = 0
+        temp = {
+            "name": name,
+            "amount": 0,
+            "time": formatted_time,
+            "sign": 0,
+            "lottery": 0,
+            "prev_task_timeStamp": 0,
+            "treasure_task_cnt": 0,
+            "shopping_earn_money_cnt": 15,
+            "browse_products_cnt": 10,
+            "excitation_ad_cnt": 10,
+            "next_readComic": 1,
+            "daily_play_game_cnt": 5,
+            "next_readNovel": 0.5,
+            "next_short_video": 0.5,
+            "next_listenNoval": 0.5,
+            "meal_finished": -1,
+            "sleep_finished": sleep_finished,
+            "excitation_ad_repeat_cnt": 96,
+            "next_open_treasure_box": next_open_treasure_box,
+            "title": title
         }
-        writeFile(tomato_read_json, new_userList_json)
+        new_userList.append(temp)
 
-
-tomato_read_json_init()
+    print(new_userList)
+    new_userList_json = {
+        "userList": new_userList
+    }
+    writeFile(filePath, new_userList_json)
