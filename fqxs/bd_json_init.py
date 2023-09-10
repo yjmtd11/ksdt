@@ -1,7 +1,7 @@
 """
 
 time: 2023.9.6
-cron: 1 0 * * *
+cron: 0 0 * * *
 new Env('json格式化');
 
 """
